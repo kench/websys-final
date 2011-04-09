@@ -6,37 +6,45 @@
  * COURSE: Web Systems Development
  * AUTHOR(s): Matthew Perry
  * DESCRIPTION:
- *  Class abstraction for mysql database
- *  queries.
+ *  Singleton class abstraction for all 
+ *  database queries.
  */
 
-class database
+class Database
 {
-    private $db;
-    private $db_info;
+    private static $link = null;
 
-    function database()
+    // Static function to establish a connection
+    // with the database, not called directly
+    private static function getLink() 
     {
-        $db_info = parse_ini_file( dirname(__FILE__) . '/../config.ini' );
+        // Return $link variable if its defined
+        if( self::$link ) return self::$link;
+
+        // Parse the .ini file for the db information
+        $info = parse_ini_file( dirname(__FILE__) . '/../config.ini' );
+
+        // Set up the Data Source Name, which contains the info for
+        // the DB connection
+        $dsn = "{$info['driver']}:";
+        foreach( $info['dsn'] as $key => $value )
+            $dsn .= "$key=$value;";
+
+        // Actually connect
+        self::$link = new PDO( $dsn, $info['user'], $info['pass'] );
+        return self::$link;
     }
 
-    function connect()
+    // This is a special PHP member function which takes
+    // in any attempted call to a static member of this class
+    // which isnt explicitly defined.
+    //
+    // This particular implementation just redirects the static
+    // call to the $link variable which is a PDO in this case
+    public static function __callStatic( $name, $args )
     {
-        if( !($db = mysql_connect( $db_info[ "host" ], $db_info[ "user" ], $db_info[ "pass" ] )) )
-            die( "FATAL: Could not connect to DB server: " . mysql_error() );
-        if( !mysql_select_db( $db_info[ "name" ], $db ) )
-            die( "FATAL: Could not connect to DB: " . mysql_error() );
-    }
-
-    function query( $sql )
-    {
-        return mysql_query( $sql, $db );
-    }
-
-    function close()
-    {
-        if( !mysql_close( $db ) )
-            die( "FATAL: Could not disconnect from DB: " . mysql_error() );
+        $callback = array( self::getLink(), $name );
+        return call_user_func_array( $callback, $args );
     }
 }
 ?>
