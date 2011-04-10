@@ -12,4 +12,5 @@
 
 require_once( "database.class.php" );
 require_once( "user.class.php" );
+require_once( "cluster.class.php" );
 ?>

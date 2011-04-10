@@ -9,7 +9,7 @@
  *  Class for manipulating users and
  *  their related data
  */
-require_once( "database.class.php" );
+require_once( "api.php" );
 
 class User
 {
