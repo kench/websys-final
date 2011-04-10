@@ -9,7 +9,7 @@
  *  Main page, shows relevant links based on QT
  *  clustering algorithm
  */
-require_once( "lib/user.class.php" );
+require_once( "lib/api.php" );
 
 echo "<h1>WORK IN PROGRESS</h1>";
 echo "<h2>All User IDs:</h2>";
