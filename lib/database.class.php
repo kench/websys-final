@@ -22,7 +22,7 @@ class Database
         if( self::$link ) return self::$link;
 
         // Parse the .ini file for the db information
-        $info = parse_ini_file( dirname(__FILE__) . '/../config.ini' );
+        $info = parse_ini_file( dirname(__FILE__) . '/../config.ini', true );
 
         // Set up the Data Source Name, which contains the info for
         // the DB connection
