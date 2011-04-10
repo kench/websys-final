@@ -84,6 +84,8 @@ class User
     }
 
     private $data;
+    private $m_cluster;
+    private $m_parent;
 
     // User constructor
     public function User( $uid, $clicks = null, $parent = null )
@@ -104,13 +106,35 @@ class User
         return null;
     }
 
+    // Return the cluster that this user belongs to
+    public function getCluster()
+    {
+        // A little caching
+        if( isset( $m_cluster ) )
+            return $m_cluster;
+        else
+            return $m_cluster = Cluster::find_by_user( $this );
+    }
+
+    // Return recommendations for this user
+    public function recommendations( $num = 10 )
+    {
+        return $this->getCluster()->recommendations( $num );
+    }
+
     // This returns a user class which is the
     // parent of this user. This is different
     // than user->parent which returns just
     // the parent's id
     public function getParent()
     {
-        return User::find( $this->data['parent'] );
+        if( $this->isCenter() ) return $this
+
+        // A little caching
+        if( isset( $m_parent ) )
+            return $m_parent
+        else
+            return $m_parent = User::find( $this->data['parent'] );
     }
 
     // This gives the current user a new parent
