@@ -20,7 +20,7 @@ class User
     // occurs.
     private static $SQL_CLICKS = "SELECT DISTINCT url FROM clicks WHERE uid = ?;";
     private static $SQL_PARENT = "SELECT parent FROM centers WHERE uid = ?;";
-    private static $SQL_UIDS = "SELECT DISTINCT uid FROM clicks;";
+    private static $SQL_UIDS = "SELECT DISTINCT uid FROM clicks WHERE clicked_at > ?;";
 
     private static $SQL_ADD_CLICK = "INSERT INTO clicks VALUES( ?, ?, ? );";
     private static $SQL_ADD_PARENT = "INSERT INTO centers VALUES( ?, ? );";
@@ -61,7 +61,7 @@ class User
     }
 
     // Return all of the recorded UIDs of users
-    public static function getUIDs()
+    public static function getUIDs( $time = 0 )
     {
         try
         {
@@ -69,7 +69,7 @@ class User
             $uids = Database::prepare( self::$SQL_UIDS );
 
             // Execute the query and throw an exception if it fails
-            if( !$uids->execute() )
+            if( !$uids->execute( array( $time ) ) )
                 throw new PDOException( "Could not execute uids query" );
 
             // Return all the rows according to the symantics
@@ -128,11 +128,11 @@ class User
     // the parent's id
     public function getParent()
     {
-        if( $this->isCenter() ) return $this
+        if( $this->isCenter() ) return $this;
 
         // A little caching
         if( isset( $m_parent ) )
-            return $m_parent
+            return $m_parent;
         else
             return $m_parent = User::find( $this->data['parent'] );
     }

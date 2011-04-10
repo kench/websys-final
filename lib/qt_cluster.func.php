@@ -10,51 +10,67 @@
  *  which clusters user clicks based on similarity
  */
 require_once( "api.php" );
-ini_set( "memory_limit", "1G" );
 
 // Perform the Quality Threshold clustering
 function qt_cluster()
 {
+    // Super hackish memory expansion, reconsider PHP
+    ini_set( "memory_limit", "192M" );
+
+    // Get all user ids that clicked in the past $time
+    $date = date( "Y-m-d H:i:s", time() - ( 6 * 24 * 60 * 60 ) );
+    $uids = User::getUIDs( $date );
+
+    // Temporary hard-coded threshold
+    $threshold = 0.5;
+
     // Initiate a large transaction to the DB
     Database::beginTransaction();
 
     // Clear out current clusters
     Database::query( "TRUNCATE centers;" );
 
-    // Get all user ids that clicked in the past $time
-    $time = time() - ( 14 * 24 * 60 * 60 ); // 1 weeks ago
-    $date = date( "Y-m-d H:i:s", $time );
-    $uids = User::getUIDs( $date );
+    // Calculate the set of clusters
+    $clusters = qt_recurse( $uids, $threshold );
 
-    // Calculate distances for each pair
-    for( $i = 0; $i < count( $uids ); ++$i )
-    {
-        for( $j = 0; $j <= $i; ++$j )
-        {
-            // Lazily evaluate each user ID to save some semblance
-            // of running time
-            if( !is_object( $uids[$i] ) )
-                $uids[$i] = User::find( $uids[$i] );
-            if( !is_object( $uids[$j] ) ) 
-                $uids[$j] = User::find( $uids[$j] );
-
-            // Calculate the similarity index
-            if( count( $uids[$i]->clicks ) < count( $uids[$j]->clicks ) )
-                $sim_ndx[$i][$j] = qt_distance( $uids[$i]->clicks, $uids[$j]->clicks );
-            else
-                $sim_ndx[$i][$j] = qt_distance( $uids[$j]->clicks, $uids[$i]->clicks );
-        }
-    }
-
-    // Continue until every cell is 0
-    while( !zeros( $sim_ndx ) )
-    {
-        //TODO: Implement the remainder of this...
-        break;
-    }
+    // Save every cluster to the DB, this takes forever
+    foreach( $clusters as $cluster )
+        $cluster->save();
 
     // Commit the entire transaction
     Database::commit();
+}
+
+// The meat of the clustering, this recurses over 
+// points finding the largest clusters
+function qt_recurse( $uids, $threshold )
+{
+    // Base Case
+    if( count( $uids ) == 0 ) return null;
+
+    foreach( $uids as $uid )
+    {
+        $flag = true;
+        $clusters[$uid] = new Cluster( $uid );
+
+        while( $flag && $clusters[$uid].size() != count( $uids ) )
+        {
+            // TODO: Find closest uid
+            if( $dist > $threshold )
+                $flag = false;
+            else
+                $clusters[$uid].addUser( $ );
+        }
+    }
+
+    // Pick largest cluster
+    $max = max( $clusters );
+    $output = array( $max );
+    // Remove cluster from uids
+    qt_remove( $uids, $max );
+    array_push( $output, qt_recurse( $uids, $threshold ) );
+    // Return all of the clusters
+    return $output;
 }
 
 // Given two sets, identify the distance between them
@@ -63,6 +79,9 @@ function qt_cluster()
 // count( $set1 ) <= count( $set2 ) NECESSARY
 function qt_distance( $set1, $set2 )
 {
+    // Memoize the users to minimize DB interaction
+    static $users = array(); 
+
     // Number of clicks in common
     $common = count( array_intersect( $set1, $set2 ) );
     // Total number of clicks (min)
@@ -71,12 +90,9 @@ function qt_distance( $set1, $set2 )
     return 1 - ( $common / $total ); 
 }
 
-// Return true if the entire matrix contains only 0s
-function zeros( $mat )
+// Remove the given cluster from the set of uids
+function qt_remove( $uids, $cluster )
 {
-    foreach( $mat as $k => $v )
-        foreach( $v as $p => $q )
-            if( $q != 0 ) return false;
-    return true;
+    // TODO: Implement this...
 }
 ?>

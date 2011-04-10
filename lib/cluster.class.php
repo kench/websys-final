@@ -20,6 +20,7 @@ class Cluster
     // This kind of definition allows for easier editing if a db scheme change
     // occurs.
     private static $SQL_FIND = "SELECT * FROM centers WHERE parent = ?;"; 
+    private static $SQL_SAVE = "INSERT INTO centers VALUES( ?, ? );";
 
     // Find cluster by its center id
     public static function find( $cid )
@@ -58,10 +59,28 @@ class Cluster
     private $data;
 
     // Cluster constructor
-    public function Cluster( $cid, $users )
+    public function Cluster( $cid, $users = null )
     {
         $this->data['center'] = $cid;
-        $this->data['users'] = $users;
+        if( $users = null )
+            $this->data['users'] = array();
+        else
+            $this->data['users'] = $users;
+    }
+
+    // Get the size of this cluster, including the center
+    public function size()
+    {
+        return count( $this->['users'] ) + 1;
+    }
+
+    // Add a user to this cluster
+    public function addUser( $user )
+    {
+        if( is_object( $user ) )
+            array_push( $this->data['users'], $user->uid );
+        else
+            array_push( $this->data['users'], $user );
     }
 
     // PHP special override function that gives
@@ -72,6 +91,31 @@ class Cluster
             return $this->data[$name];
 
         return null;
+    }
+
+    // Write this cluster to the DB
+    public function save()
+    {
+        try
+        {
+            // First save the center
+            $save = Database::prepare( self::$SQL_SAVE );
+            if( !$save->execute( array( $this->data['center'], $this->data['center'] ) ) )
+                throw new PDOException( "Could not execute save query" );
+
+            // Then save each user
+            foreach( $this->data['users'] as $user )
+            {
+                $save = Database::prepare( self::$SQL_SAVE );
+                if( !$save->execute( array( $this->data['center'], $user ) ) )
+                    throw new PDOException( "Could not execute save query" );
+            }
+        }
+        catch( PDOException $e )
+        {
+            echo "Error: " . $e;
+            return false;
+        }
     }
 
     // Returns num recommendations for this cluster
