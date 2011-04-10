@@ -47,8 +47,11 @@ class User
             $parent = $parent->fetch( PDO::FETCH_NUM );
 
             if( empty( $clicks ) ) $clicks = null;
-            if( empty( $parent ) ) $parent = null;
-            return new User( $uid, $clicks, $parent[0] );
+            if( empty( $parent ) ) 
+                $parent = null;
+            else
+                $parent = $parent[0];
+            return new User( $uid, $clicks, $parent );
         } 
         catch( PDOException $e )
         {
