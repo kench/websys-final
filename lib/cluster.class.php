@@ -62,8 +62,8 @@ class Cluster
     public function Cluster( $cid, $users = null )
     {
         $this->data['center'] = $cid;
-        if( $users = null )
-            $this->data['users'] = array();
+        if( $users == null )
+            $this->data['users'] = array( $cid );
         else
             $this->data['users'] = $users;
     }
@@ -71,7 +71,7 @@ class Cluster
     // Get the size of this cluster, including the center
     public function size()
     {
-        return count( $this->['users'] ) + 1;
+        return count( $this->data['users'] );
     }
 
     // Add a user to this cluster
@@ -98,12 +98,7 @@ class Cluster
     {
         try
         {
-            // First save the center
-            $save = Database::prepare( self::$SQL_SAVE );
-            if( !$save->execute( array( $this->data['center'], $this->data['center'] ) ) )
-                throw new PDOException( "Could not execute save query" );
-
-            // Then save each user
+            // Save each user
             foreach( $this->data['users'] as $user )
             {
                 $save = Database::prepare( self::$SQL_SAVE );
@@ -116,6 +111,8 @@ class Cluster
             echo "Error: " . $e;
             return false;
         }
+
+        return true;
     }
 
     // Returns num recommendations for this cluster
