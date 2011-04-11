@@ -30,7 +30,7 @@ function qt_cluster()
     Database::query( "TRUNCATE centers;" );
     // Initiate a large transaction to the DB
     Database::beginTransaction();
-    // Save every cluster to the DB, this takes forever
+    // Save every cluster to the DB
     foreach( $clusters as $cluster )
     {
         if( !$cluster->save() )
