@@ -14,7 +14,7 @@ require_once( "lib/api.php" );
 echo "<h1>WORK IN PROGRESS</h1>";
 echo "<h2>All User IDs:</h2>";
 echo "<ul>";
-foreach( User::getUIDs() as $uid )
+foreach( User::find_all() as $uid )
     echo "<li>".$uid."</li>";
 echo "</ul>";
 ?>
