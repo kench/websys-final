@@ -21,6 +21,7 @@ class User
     private static $SQL_CLICKS = "SELECT DISTINCT url FROM clicks WHERE uid = ?;";
     private static $SQL_PARENT = "SELECT parent FROM centers WHERE uid = ?;";
     private static $SQL_UIDS = "SELECT DISTINCT uid FROM clicks WHERE clicked_at > ?;";
+    private static $SQL_UIDS_CLICKS = "SELECT * FROM clicks WHERE clicked_at > ?;";
 
     private static $SQL_ADD_CLICK = "INSERT INTO clicks VALUES( ?, ?, ? );";
     private static $SQL_ADD_PARENT = "INSERT INTO centers VALUES( ?, ? );";
@@ -43,7 +44,7 @@ class User
 
             // Fetch according to the symantics of the database
             // and return a new user with this information
-            $clicks = $clicks->fetchAll( PDO::FETCH_COLUMN, 0 );
+            $clicks = $clicks->fetchAll( PDO::FETCH_COLUMN );
             $parent = $parent->fetch( PDO::FETCH_NUM );
 
             if( empty( $clicks ) ) $clicks = null;
@@ -61,12 +62,18 @@ class User
     }
 
     // Return all of the recorded UIDs of users
-    public static function getUIDs( $time = 0 )
+    public static function find_all( $opts = false )
     {
+        // Psuedo unordered default arguements
+        $clicks = false; $time = 0;
+        extract( $opts );
         try
         {
             // Prepare the necessary queries
-            $uids = Database::prepare( self::$SQL_UIDS );
+            if( $clicks )
+                $uids = Database::prepare( self::$SQL_UIDS_CLICKS );
+            else
+                $uids = Database::prepare( self::$SQL_UIDS );
 
             // Execute the query and throw an exception if it fails
             if( !$uids->execute( array( $time ) ) )
@@ -74,7 +81,9 @@ class User
 
             // Return all the rows according to the symantics
             // of the database
-            return $uids->fetchAll( PDO::FETCH_COLUMN, 0 );
+            $fetch_type = PDO::FETCH_COLUMN;
+            if( $clicks ) $fetch_type |= PDO::FETCH_GROUP;
+            return $uids->fetchAll( $fetch_type );
         }
         catch( PDOException $e )
         {
