@@ -47,7 +47,7 @@ class User
             $clicks = $clicks->fetchAll( PDO::FETCH_COLUMN );
             $parent = $parent->fetch( PDO::FETCH_NUM );
 
-            if( empty( $clicks ) ) $clicks = null;
+            if( empty( $clicks ) ) $clicks = array();
             if( empty( $parent ) ) 
                 $parent = null;
             else

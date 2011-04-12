@@ -6,7 +6,7 @@
  * COURSE: Web Systems Development
  * AUTHOR(s): Matthew Perry
  * DESCRIPTION:
- *  The meat of the assignment; A function
+ *  The meat of the assignment; A class
  *  which clusters user clicks based on similarity
  */
 require_once( "api.php" );
