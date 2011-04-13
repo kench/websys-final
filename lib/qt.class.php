@@ -100,15 +100,18 @@ class QualityThreshold
     // using the QT calculation and Jaccard distance
     private static function distance( $uid1, $uid2 )
     {
-        // Max and min function identify the smaller of the sets
-        $set1 = min( self::$users[$uid1], self::$users[$uid2] );
-        $set2 = max( self::$users[$uid1], self::$users[$uid2] );
+        // Identify the smaller of the sets
+        $set1 = self::$users[$uid1];
+        $set2 = self::$users[$uid2];
+        if( count( $set1 ) > count( $set2 ) )
+        {
+            $set1 = self::$users[$uid2];
+            $set2 = self::$users[$uid1];
+        }
         // Number of clicks in common
         $common = count( array_intersect( $set1, $set2 ) );
-        // Total number of clicks (min)
-        $total = count( $set1 );
         // Return Jaccard Distance
-        return 1 - ( $common / $total ); 
+        return 1 - ( $common / count( $set1 ) ); 
     }
 }
 ?>

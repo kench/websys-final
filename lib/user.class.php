@@ -66,7 +66,7 @@ class User
     {
         // Psuedo unordered default arguements
         $clicks = false; $time = 0;
-        extract( $opts );
+        if( $opts ) extract( $opts );
         try
         {
             // Prepare the necessary queries
