@@ -4,7 +4,7 @@
  *
  * FILE: article.class.php
  * COURSE: Web Systems Development
- * AUTHOR(s): Matthew Perry
+ * AUTHOR(s): Matthew Perry, Kenley Cheung
  * DESCRIPTION:
  *  Class abstraction for manipulating
  *  cached RSS feed articles
@@ -47,6 +47,30 @@ class Article
             return false;
         }
     }
+
+	// Return all articles
+	
+	public static function find_all( $opts = false )
+	{
+		$articles = Database::prepare( self::$SQL_FIND );
+		if ( $opts ) extract ( $opts );
+		try
+		{
+			if( !$article->execute( array( $url ) ) )
+                throw new PDOException( "Could not execute find query" );
+
+			// Return all the rows according to the symantics
+            // of the database
+            $fetch_type = PDO::FETCH_COLUMN;
+            if( $articles ) $fetch_type |= PDO::FETCH_GROUP;
+            return $articles->fetchAll( $fetch_type );
+		}
+		catch( PDOException $e )
+		{
+			echo "Error: " . $e;
+			return false;
+		}
+	}
 
     private $data;
 
