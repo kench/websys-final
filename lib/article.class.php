@@ -22,6 +22,7 @@ class Article
     // NOTE: In this context the URL field MUST be unique because the user table
     // is using it as a foreign key to the articles.
     private static $SQL_FIND = "SELECT * FROM articles WHERE url = ?;";
+    private static $SQL_FIND_ALL = "SELECT * FROM articles;";
     private static $SQL_SAVE = "INSERT INTO articles VALUES( ?, ?, ?, ? );";
 
     // Find article by its url
@@ -49,21 +50,22 @@ class Article
     }
 
 	// Return all articles
-	
-	public static function find_all( $opts = false )
+	public static function find_all()
 	{
-		$articles = Database::prepare( self::$SQL_FIND );
-		if ( $opts ) extract ( $opts );
 		try
-		{
-			if( !$article->execute( array( $url ) ) )
+        {
+            // Prepare the necessary queries
+            $articles = Database::prepare( self::$SQL_FIND );
+
+			if( !$article->execute() )
                 throw new PDOException( "Could not execute find query" );
 
 			// Return all the rows according to the symantics
             // of the database
-            $fetch_type = PDO::FETCH_COLUMN;
-            if( $articles ) $fetch_type |= PDO::FETCH_GROUP;
-            return $articles->fetchAll( $fetch_type );
+            $all = array();
+            foreach( $articles->fetchAll() as $article )
+                array_push( $all, $article );                
+            return $all;
 		}
 		catch( PDOException $e )
 		{

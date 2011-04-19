@@ -14,6 +14,6 @@
 require_once( "database.class.php" );
 require_once( "user.class.php" );
 require_once( "cluster.class.php" );
-require_once( "article.class.php" );
+//require_once( "article.class.php" );
 require_once( "qt.class.php" );
 ?>
