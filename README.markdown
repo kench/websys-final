@@ -4,18 +4,40 @@ This is the final project for the course "Web Systems Development"
 
 ## API-Documentation
 
+### Usage
+
+To use this API, simply include the following at the top of your source files:
+
+    require_once( "lib/api.php" );
+
 ### Article Class
 
-#### Functions
+The Article class provides an interface to interact with cached rss articles from Morning Mail.
+
+#### Static Functions
+
+#### Member Functions
 
 ### User Class
 
-#### Functions
+The User class provides an interface to interact with the users of our service.
+
+#### Static Functions
+
+#### Member Functions
 
 ### Cluster Class
 
-#### Functions
+The Cluster class provides an interface to interact with the clusters used by our recommendation system.
+
+#### Static Functions
+
+#### Member Functions
 
 ### Quality Threshold Clustering
 
-#### Functions
+The Quality Threshold class provides an interface to perform fast quality threshold clustering.
+
+#### Static Functions
+
+#### Member Functions
