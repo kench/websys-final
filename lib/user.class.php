@@ -201,7 +201,7 @@ class User
     // This gives the current user a new parent
     private function set_parent( $pid )
     {
-        if( is_object( $parent ) ) $pid = $pid->uid;
+        if( is_object( $pid ) ) $pid = $pid->uid;
         try
         {
             // Prepare the query and execute, throwing errors if necessary

@@ -25,7 +25,7 @@ class QualityThreshold
         self::$threshold = $threshold;
         // Get all user ids that clicked in the past $time
         self::$date = date( "Y-m-d H:i:s", time() - ( $days * 24 * 60 * 60 ) );
-        self::$users = User::find_all( array( 'time' => self::$date, 'clicks' => true ) );
+        self::$users = User::get_raw_data( array( 'time' => self::$date, 'clicks' => true ) );
 
         // Calculate the set of clusters
         return self::$clusters = self::recurse( array_keys( self::$users ) );
