@@ -17,12 +17,40 @@ The Article class provides an interface to interact with cached rss articles fro
 #### Static Functions
 
  * `Article::mm_update( void )`
+   * **Description**:
+   * **Parameters**:
+   * **Return**:
  * `Article::cleanup( [date $before] )`
+   * **Description**:
+   * **Parameters**:
+   * **Return**:
  * `Article::find( string $url )`
+   * **Description**:
+   * **Parameters**:
+   * **Return**:
  * `Article::find_by_array( array $urls )` 
+   * **Description**:
+   * **Parameters**:
+   * **Return**:
  * `Article::find_all( void )`
+   * **Description**:
+   * **Parameters**:
+   * **Return**:
 
 #### Member Functions
+
+ * `Article->__construct()`
+   * **Description**:
+   * **Parameters**:
+   * **Return**:
+ * `Article->__get( string $name )`
+   * **Description**:
+   * **Parameters**:
+   * **Return**:
+ * `Article->save( void )`
+   * **Description**:
+   * **Parameters**:
+   * **Return**:
 
 ### User Class
 
