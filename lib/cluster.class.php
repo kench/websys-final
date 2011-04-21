@@ -30,9 +30,8 @@ class Cluster
             // Prepare the necessary queries
             $cluster = Database::prepare( self::$SQL_FIND );
 
-            // Execute the query and throw an exception if it fails
-            if( !$cluster->execute( array( $cid ) ) )
-                throw new PDOException( "Could not execute find query" );
+            // Execute the query
+            $cluster->execute( array( $cid ) );
 
             // Fetch according to the symantics of the database
             // and return a new cluster with this information
@@ -59,28 +58,13 @@ class Cluster
     private $data;
 
     // Cluster constructor
-    public function Cluster( $cid, $users = null )
+    public function __construct( $cid, $users = null )
     {
         $this->data['center'] = $cid;
         if( $users == null )
             $this->data['users'] = array( $cid );
         else
             $this->data['users'] = $users;
-    }
-
-    // Get the size of this cluster, including the center
-    public function size()
-    {
-        return count( $this->data['users'] );
-    }
-
-    // Add a user to this cluster
-    public function addUser( $user )
-    {
-        if( is_object( $user ) )
-            array_push( $this->data['users'], $user->uid );
-        else
-            array_push( $this->data['users'], $user );
     }
 
     // PHP special override function that gives
@@ -93,6 +77,21 @@ class Cluster
         return null;
     }
 
+    // Get the size of this cluster, including the center
+    public function size()
+    {
+        return count( $this->data['users'] );
+    }
+
+    // Add a user to this cluster
+    public function add_user( $user )
+    {
+        if( is_object( $user ) )
+            array_push( $this->data['users'], $user->uid );
+        else
+            array_push( $this->data['users'], $user );
+    }
+
     // Write this cluster to the DB
     public function save()
     {
@@ -102,9 +101,9 @@ class Cluster
             foreach( $this->data['users'] as $user )
             {
                 $save = Database::prepare( self::$SQL_SAVE );
-                if( !$save->execute( array( $this->data['center'], $user ) ) )
-                    throw new PDOException( "Could not execute save query" );
+                $save->execute( array( $this->data['center'], $user ) );
             }
+            return true;
         }
         catch( PDOException $e )
         {

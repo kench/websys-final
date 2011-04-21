@@ -34,25 +34,23 @@ class User
         {
             // Prepare the necessary queries
             $clicks = Database::prepare( self::$SQL_CLICKS );
-            $parent = Database::prepare( self::$SQL_PARENT );
+            $pid = Database::prepare( self::$SQL_PARENT );
 
-            // Execute the query and throw an exception if it fails
-            if( !$clicks->execute( array( $uid ) ) )
-                throw new PDOException( "Could not execute clicks query" );
-            if( !$parent->execute( array( $uid ) ) )
-                throw new PDOException( "Could not execute parent query" );
+            // Execute the queries
+            $clicks->execute( array( $uid ) );
+            $pid->execute( array( $uid ) );
 
             // Fetch according to the symantics of the database
             // and return a new user with this information
             $clicks = $clicks->fetchAll( PDO::FETCH_COLUMN );
-            $parent = $parent->fetch( PDO::FETCH_NUM );
+            $pid = $pid->fetch( PDO::FETCH_NUM );
 
             if( empty( $clicks ) ) $clicks = array();
-            if( empty( $parent ) ) 
-                $parent = null;
+            if( empty( $pid ) ) 
+                $pid = null;
             else
-                $parent = $parent[0];
-            return new User( $uid, $clicks, $parent );
+                $pid = $pid[0];
+            return new User( $uid, $clicks, $pid );
         } 
         catch( PDOException $e )
         {
@@ -62,7 +60,7 @@ class User
     }
 
     // Return all of the recorded UIDs of users
-    public static function find_all( $opts = false )
+    public static function get_raw_data( $opts = false )
     {
         // Psuedo unordered default arguements
         $clicks = false; $time = 0;
@@ -75,9 +73,8 @@ class User
             else
                 $uids = Database::prepare( self::$SQL_UIDS );
 
-            // Execute the query and throw an exception if it fails
-            if( !$uids->execute( array( $time ) ) )
-                throw new PDOException( "Could not execute uids query" );
+            // Execute the query
+            $uids->execute( array( $time ) );
 
             // Return all the rows according to the symantics
             // of the database
@@ -97,11 +94,11 @@ class User
     private $m_parent;
 
     // User constructor
-    public function User( $uid, $clicks = null, $parent = null )
+    public function __construct( $uid, $clicks = null, $pid = null )
     {
         $this->data['uid'] = $uid;
         $this->data['clicks'] = $clicks;
-        $this->data['parent'] = $parent;
+        $this->data['pid'] = $pid;
     }
 
     // Special override function which allows
@@ -112,67 +109,26 @@ class User
         if( array_key_exists( $name, $this->data ) )
             return $this->data[$name];
 
+        $function = "get_" . $name;
+        if( method_exists( $this, $function ) )
+            return call_user_func( array( $this, $function ), $value );
+
         return null;
     }
 
-    // Return the cluster that this user belongs to
-    public function getCluster()
+    // Special override function for setting
+    // properties of this class
+    public function __set( $name, $value )
     {
-        // A little caching
-        if( isset( $m_cluster ) )
-            return $m_cluster;
-        else
-            return $m_cluster = Cluster::find_by_user( $this );
-    }
+        $function = "set_" . $name;
+        if( method_exists( $this, $function ) )
+            return call_user_func( array( $this, $function ), $value );
 
-    // Return recommendations for this user
-    public function recommendations( $num = 10 )
-    {
-        return $this->getCluster()->recommendations( $num );
-    }
-
-    // This returns a user class which is the
-    // parent of this user. This is different
-    // than user->parent which returns just
-    // the parent's id
-    public function getParent()
-    {
-        if( $this->isCenter() ) return $this;
-
-        // A little caching
-        if( isset( $m_parent ) )
-            return $m_parent;
-        else
-            return $m_parent = User::find( $this->data['parent'] );
-    }
-
-    // This gives the current user a new parent
-    public function setParent( $pid )
-    {
-        try
-        {
-            // Prepare the query and execute, throwing errors if necessary
-            if( $this->data['parent'] == null )
-                $query = Database::prepare( self::$SQL_ADD_PARENT );
-            else
-                $query = Database::prepare( self::$SQL_SET_PARENT );
-
-            if( !$query->execute( array( $pid, $this->data['uid'] ) ) )
-                throw new PDOException( "Could not execute set parent query" );
-
-            // Set the data of this object if the query executed
-            $this->data['parent'] = $pid;
-            return true;
-        }
-        catch( PDOException $e )
-        {
-            echo "Error: " . $e;
-            return false;
-        }
+        return null;
     }
 
     // This records a click for this user
-    public function addClick( $url, $time = null )
+    public function add_click( $url, $time = null )
     {
         try
         {
@@ -180,8 +136,7 @@ class User
             $query = Database::prepare( self::$SQL_ADD_CLICK );
             
             if( $time == null ) $time = date( "Y-m-d H:i:s" );
-            if( !$query->execute( array( $this->data['uid'], $url, $time ) ) )
-                throw new PDOException( "Could not execute add click query" );
+            $query->execute( array( $this->data['uid'], $url, $time ) );
 
             // Add a click to this user object if the query executed
             array_push( $this->data['clicks'], $url );
@@ -196,9 +151,76 @@ class User
 
     // Boolean function which returns true
     // if this user is a center of a cluster
-    public function isCenter()
+    public function is_center()
     {
-        return $this->data['uid'] == $this->data['parent'];
+        return $this->data['uid'] == $this->data['pid'];
+    }
+
+    // Return recommendations for this user
+    public function recommendations( $num = 10 )
+    {
+        return $this->cluster()->recommendations( $num );
+    }
+
+    /******************************************************************
+     * PRIVATE METHODS
+     *****************************************************************/
+
+    // Return the cluster that this user belongs to
+    private function get_cluster()
+    {
+        // A little caching
+        if( isset( $m_cluster ) )
+            return $m_cluster;
+        else
+            return $m_cluster = Cluster::find_by_user( $this );
+    }
+
+    // This sets the cluster of this user
+    private function set_cluster( &$cluster )
+    {
+        $this->set_parent( $cluster->center );
+        $cluster->add_user( $this );
+    }
+
+    // This returns a user class which is the
+    // parent of this user. This is different
+    // than user->parent which returns just
+    // the parent's id
+    private function get_parent()
+    {
+        if( $this->is_center() ) return $this;
+
+        // A little caching
+        if( isset( $m_parent ) )
+            return $m_parent;
+        else
+            return $m_parent = User::find( $this->data['pid'] );
+    }
+
+    // This gives the current user a new parent
+    private function set_parent( $pid )
+    {
+        if( is_object( $parent ) ) $pid = $pid->uid;
+        try
+        {
+            // Prepare the query and execute, throwing errors if necessary
+            if( $this->data['parent'] == null )
+                $query = Database::prepare( self::$SQL_ADD_PARENT );
+            else
+                $query = Database::prepare( self::$SQL_SET_PARENT );
+
+            $query->execute( array( $pid, $this->data['uid'] ) );
+
+            // Set the data of this object if the query executed
+            $this->data['pid'] = $pid;
+            return true;
+        }
+        catch( PDOException $e )
+        {
+            echo "Error: " . $e;
+            return false;
+        }
     }
 }
 ?>

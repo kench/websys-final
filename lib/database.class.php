@@ -32,6 +32,7 @@ class Database
 
         // Actually connect
         self::$link = new PDO( $dsn, $info['user'], $info['pass'] );
+        self::$link->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
         return self::$link;
     }
 

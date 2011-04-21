@@ -22,8 +22,70 @@ class Article
     // NOTE: In this context the URL field MUST be unique because the user table
     // is using it as a foreign key to the articles.
     private static $SQL_FIND = "SELECT * FROM articles WHERE url = ?;";
-    private static $SQL_FIND_ALL = "SELECT * FROM articles;";
-    private static $SQL_SAVE = "INSERT INTO articles VALUES( ?, ?, ?, ? );";
+    private static $SQL_FIND_ALL = "SELECT * FROM articles ORDER BY date DESC;";
+    private static $SQL_FIND_IN = "SELECT * FROM articles WHERE url IN ( %list ) ORDER BY date DESC;";
+
+    private static $SQL_SAVE = "INSERT INTO articles VALUES( :h, :s, :d, :u );";
+    private static $SQL_CLEAN = "DELETE FROM articles WHERE date < ?;";
+
+    // Special function to update the db from RSS feed
+    public static function mm_update()
+    {
+        // Get the RSS feed from Morning Mail
+        $xml = simplexml_load_file( 'http://morningmail.rpi.edu/rss' );
+        
+        // Begin the transaction
+        Database::beginTransaction();
+
+        $count = 0;
+        foreach( $xml->channel->item as $item )
+        {
+            // Check for duplicates (no DB-agnostic way
+            // to ignore duplicate errors)
+            if( self::find( $item->link ) ) continue;
+
+            // Parse data and construct Article objects,
+            // save them to the DB
+            $date = date_create( $item->pubDate );
+            $a = new Article( $item->title, strip_tags( $item->description ), 
+                              $date->format( 'Y-m-d H:i:s' ), $item->link );
+            // Increment row count
+            $count++;
+            if( !$a->save() )
+            {
+                Database::rollBack();
+                return false;
+            }
+        }
+
+        // Commit transaction
+        Database::commit();
+        return $count;
+    }
+
+    // Special function to cleanup the RSS feed data
+    public static function cleanup( $date = null )
+    {
+        // Set default time to a month ago
+        if( $date == null ) $date = date( "Y-m-d H:i:s", strtotime( "-1 month" ) ); 
+
+        try
+        {
+            // Prepare the necessary query
+            $delete = Database::prepare( self::$SQL_CLEAN );
+
+            // Execute the query
+            $delete->execute( array( $date ) );
+
+            // Return rows deleted
+            return $delete->rowCount();
+        }
+        catch( PDOException $e )
+        {
+            echo "Error: " . $e;
+            return false;
+        }
+    }
 
     // Find article by its url
     public static function find( $url )
@@ -33,14 +95,46 @@ class Article
             // Prepare the necessary queries
             $article = Database::prepare( self::$SQL_FIND );
 
-            // Execute the query and throw an exception if it fails
-            if( !$article->execute( array( $url ) ) )
-                throw new PDOException( "Could not execute find query" );
+            // Execute the query
+            $article->execute( array( $url ) );
 
             // Fetch according to the symantics of the database
             // and return a new article with this information
             if( $article->rowCount() == 0 ) return false;
-            return new Article( $cluster->fetchAll() );
+            return new Article( $article->fetchAll( PDO::FETCH_ASSOC ) );
+        }
+        catch( PDOException $e )
+        {
+            echo "Error: " . $e;
+            return false;
+        }
+    }
+
+    // Return all articles that have a url in the array
+    public static function find_by_array( $urls )
+    {
+        if( empty( $urls ) ) return array();
+
+        // Append special chars to query string for variable
+        // length inputs
+        $var_list = "?";
+        for( $i = 1; $i < count( $urls ); $i++ )
+            $var_list .= ", ?";
+        try
+        {
+            // Prepare the necessary queries
+            $articles = Database::prepare( str_replace( "%list", $var_list, self::$SQL_FIND_IN ) );
+
+            // Execute the query
+            $articles->execute( $urls );
+
+            // Fetch according to the symantics of the database
+            // and return a new array of articles
+            if( $articles->rowCount() == 0 ) return false;
+            $all = array();
+            foreach( $articles->fetchAll( PDO::FETCH_ASSOC ) as $article )
+                array_push( $all, new Article( $article ) );                
+            return $all;
         }
         catch( PDOException $e )
         {
@@ -55,16 +149,17 @@ class Article
 		try
         {
             // Prepare the necessary queries
-            $articles = Database::prepare( self::$SQL_FIND );
+            $articles = Database::prepare( self::$SQL_FIND_ALL );
 
-			if( !$article->execute() )
-                throw new PDOException( "Could not execute find query" );
+            // Execute query
+			$articles->execute();
 
 			// Return all the rows according to the symantics
             // of the database
+            if( $articles->rowCount() == 0 ) return false;
             $all = array();
-            foreach( $articles->fetchAll() as $article )
-                array_push( $all, $article );                
+            foreach( $articles->fetchAll( PDO::FETCH_ASSOC ) as $article )
+                array_push( $all, new Article( $article ) );                
             return $all;
 		}
 		catch( PDOException $e )
@@ -76,19 +171,23 @@ class Article
 
     private $data;
 
-    // Article constructor 1
-    public function Article( $data )
+    // Article constructor
+    public function __construct()
     {
-        $this->data = $data;
-    }
-
-    // Article constructor 2
-    public function Article( $headline, $summary, $date, $url )
-    {
-        $this->data['headline'] = $headline;
-        $this->data['summary'] = $summary;
-        $this->data['date'] = $date;
-        $this->data['url'] = $url;
+        // Use PHP special functions to perform
+        // a psuedo overloading of this constructor
+        $num_args = func_num_args();
+        if( $num_args == 1 )
+        {
+            $this->data = func_get_arg( 0 );
+        }
+        elseif( $num_args == 4 )
+        {
+            $this->data['headline'] = func_get_arg( 0 );
+            $this->data['summary'] = func_get_arg( 1 );
+            $this->data['date'] = func_get_arg( 2 );
+            $this->data['url'] = func_get_arg( 3 );
+        }
     }
 
     // PHP special override function that gives
@@ -107,10 +206,15 @@ class Article
         {
             // Prepare save query
             $save = Database::prepare( self::$SQL_SAVE );
-            // This assumes that the $data variable has its
-            // keys in the correct order (we may need named parameters
-            // in the query here)
-            if( !$save->execute( array_values( $data ) ); 
+
+            // Set the parameters of the query
+            foreach( $this->data as $k => $v )
+                $save->bindValue( ":" . $k[0], $v, PDO::PARAM_STR );
+
+            // Execute query
+            $save->execute();
+
+            return true;
         }
         catch( PDOException $e )
         {
