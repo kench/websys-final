@@ -18,8 +18,7 @@ The Article class provides an interface to interact with cached rss articles fro
 
  * `Article::mm_update( void )`
    * **Description**:
-
-    This function will simply pull all of the RSS feed items from "http://morningmail.rpi.edu/rss" and save them to the database.
+      This function will simply pull all of the RSS feed items from "http://morningmail.rpi.edu/rss" and save them to the database.
    * **Parameters**:
    * **Return**:
  * `Article::cleanup( [date $before] )`
