@@ -16,6 +16,12 @@ The Article class provides an interface to interact with cached rss articles fro
 
 #### Static Functions
 
+ * [Article::mm_update][mm_update]
+ * [Article::cleanup][cleanup]
+ * [Article::find][find]
+ * [Article::find_by_array][find_by_array] 
+ * [Article::find_all][find_all]
+
 #### Member Functions
 
 ### User Class
