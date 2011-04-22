@@ -176,13 +176,6 @@ class User
             return $m_cluster = Cluster::find_by_user( $this );
     }
 
-    // This sets the cluster of this user
-    private function set_cluster( &$cluster )
-    {
-        $this->set_parent( $cluster->center );
-        $cluster->add_user( $this );
-    }
-
     // This returns a user class which is the
     // parent of this user. This is different
     // than user->parent which returns just
