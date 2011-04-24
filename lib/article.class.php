@@ -199,7 +199,7 @@ class Article
         return null;
     }
 
-    public function save()
+    private function save()
     {
         try
         {
