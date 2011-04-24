@@ -21,6 +21,13 @@ class Cluster
     // occurs.
     private static $SQL_FIND = "SELECT * FROM centers WHERE parent = ?;"; 
     private static $SQL_SAVE = "INSERT INTO centers VALUES( ?, ? );";
+    public static $SQL_REC = <<<EOD
+SELECT url, COUNT( url ) AS num_clicks
+FROM clicks 
+WHERE uid IN ( %list ) AND clicked_at >= :today
+GROUP BY url
+ORDER BY num_clicks DESC;
+EOD;
 
     // Find cluster by its center id
     public static function find( $cid )
@@ -50,9 +57,9 @@ class Cluster
     public static function find_by_user( $user )
     {
         if( is_object( $user ) )
-            return self::find( $user->parent );
+            return self::find( $user->pid );
         else
-            return self::find( User::find( $user )->parent );
+            return self::find( User::find( $user )->pid );
     }
 
     private $data;
@@ -87,9 +94,9 @@ class Cluster
     public function add_user( $user )
     {
         if( is_object( $user ) )
-            array_push( $this->data['users'], $user->uid );
+            $this->data['users'][] = $user->uid;
         else
-            array_push( $this->data['users'], $user );
+            $this->data['users'][] = $user;
     }
 
     // Write this cluster to the DB
@@ -117,7 +124,44 @@ class Cluster
     // Returns num recommendations for this cluster
     public function recommendations( $num = 10 )
     {
-        // TODO: Implement this...
+        if( $num == 0 ) return array();
+
+        // Append special chars to query string for variable
+        // length inputs
+        $var_list = ":0";
+        for( $i = 1; $i < $this->size(); $i++ )
+            $var_list .= ", :" . $i;
+        try
+        {
+            // Prepare the necessary queries
+            $clicks = Database::prepare( str_replace( "%list", $var_list, self::$SQL_REC ) );
+
+            // Execute the query
+            for( $i = 0; $i < $this->size(); $i++ )
+                $clicks->bindValue( ":" . $i, $this->data["users"][$i], PDO::PARAM_STR );
+            $today = date( "Y-m-d 00:00:00" );
+            $clicks->bindValue( ":today", $today, PDO::PARAM_STR );
+            $clicks->execute();
+
+            // Find all the articles associated with the recommended
+            // urls
+            $clicks = $clicks->fetchAll( PDO::FETCH_ASSOC );
+            foreach( $clicks as $url => $count )
+                $recommendations[] = Article::find( $url );
+            if( empty( $clicks ) )
+                $recommendations = array();
+
+            // If there are less than $num recommended urls, fill the
+            // remainder of the request with the newest articles
+            $num_normal = $num - count( $clicks );
+            array_push( $recommendations, Article::find_all( $num_normal ) );
+            return $recommendations;
+        }
+        catch( PDOException $e )
+        {
+            echo "Error: " . $e;
+            return false;
+        }
     }
 }
 ?>

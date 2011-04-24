@@ -81,7 +81,7 @@ class QualityThreshold
                 if( $uid == $uid2 ) continue;
                 $dist = self::distance( $uid, $uid2 );
                 if( $dist <= self::$threshold )
-                    $cluster->addUser( $uid2 );
+                    $cluster->add_user( $uid2 );
             }
 
             // Only save this cluster if it is the largest one

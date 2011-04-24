@@ -111,7 +111,7 @@ class User
 
         $function = "get_" . $name;
         if( method_exists( $this, $function ) )
-            return call_user_func( array( $this, $function ), $value );
+            return call_user_func( array( $this, $function ) );
 
         return null;
     }
@@ -139,7 +139,7 @@ class User
             $query->execute( array( $this->data['uid'], $url, $time ) );
 
             // Add a click to this user object if the query executed
-            array_push( $this->data['clicks'], $url );
+            $this->data['clicks'][] = $url;
             return true;
         }
         catch( PDOException $e )
@@ -159,7 +159,7 @@ class User
     // Return recommendations for this user
     public function recommendations( $num = 10 )
     {
-        return $this->cluster()->recommendations( $num );
+        return $this->get_cluster()->recommendations( $num );
     }
 
     /******************************************************************

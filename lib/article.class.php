@@ -22,7 +22,7 @@ class Article
     // NOTE: In this context the URL field MUST be unique because the user table
     // is using it as a foreign key to the articles.
     private static $SQL_FIND = "SELECT * FROM articles WHERE url = ?;";
-    private static $SQL_FIND_ALL = "SELECT * FROM articles ORDER BY date DESC LIMIT ?;";
+    private static $SQL_FIND_ALL = "SELECT * FROM articles ORDER BY date DESC LIMIT :limit;";
     private static $SQL_FIND_IN = "SELECT * FROM articles WHERE url IN ( %list ) ORDER BY date DESC;";
 
     private static $SQL_SAVE = "INSERT INTO articles VALUES( :h, :s, :d, :u );";
@@ -131,9 +131,8 @@ class Article
             // Fetch according to the symantics of the database
             // and return a new array of articles
             if( $articles->rowCount() == 0 ) return false;
-            $all = array();
             foreach( $articles->fetchAll( PDO::FETCH_ASSOC ) as $article )
-                array_push( $all, new Article( $article ) );                
+                $all[] = new Article( $article );
             return $all;
         }
         catch( PDOException $e )
@@ -143,7 +142,7 @@ class Article
         }
     }
 
-	// Return all articles
+	// Return num articles
 	public static function find_all( $num = 10 )
 	{
 		try
@@ -152,14 +151,14 @@ class Article
             $articles = Database::prepare( self::$SQL_FIND_ALL );
 
             // Execute query
-			$articles->execute( array( $num ) );
+            $articles->bindValue( ":limit", $num, PDO::PARAM_INT );
+			$articles->execute();
 
 			// Return all the rows according to the symantics
             // of the database
             if( $articles->rowCount() == 0 ) return false;
-            $all = array();
             foreach( $articles->fetchAll( PDO::FETCH_ASSOC ) as $article )
-                array_push( $all, new Article( $article ) );                
+                $all[] = new Article( $article );
             return $all;
 		}
 		catch( PDOException $e )
