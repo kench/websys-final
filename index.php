@@ -10,6 +10,7 @@
  *  clustering algorithm
  */
 require_once( "lib/api.php" );
+session_start();
 /*
 echo "<h1>WORK IN PROGRESS</h1>";
 echo "<h2>All User IDs:</h2>";
@@ -24,15 +25,24 @@ echo "</ul>";
 <head>
 <title>MorningMail Recommendations</title>
 <link rel="stylesheet" href="static/application.css" type="text/css" />
+<script></script>
 </head>
 <body>
 <div id="container">
 <header>
 	<h1>MorningMail: Articles You May Like</h1>
 	<div id="info_box">
-		<p>cheunk3@rpi.edu</p>
-		<a href="http://">Preferences</a>
-		<a href="http://">Log Out</a>
+		<?php
+		if ($_SESSION["uid"])
+		{
+			echo "<p>" . $_SESSION["uid"] . "</p>";
+			echo "<a href='login.php?logout=true'>Log Out</a>";
+		}
+		else 
+		{
+			echo "<a href='login.php'>Log In</a>";
+		}
+		?>
 	</div>
 </header>
 
