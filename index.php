@@ -51,11 +51,11 @@ echo "</ul>";
 <div id="content">
 	<ul>
 <?php
-foreach(Article::find_all() as $article_id)
+foreach(Article::find_all() as $article)
 {
 echo "<li>";
-printf("<a href='%s'>%s</a>", $article_url, $article_name);
-printf("<p>%s</p>", $article_description);
+printf("<a href='%s'>%s</a>", $article->url, $article->headline);
+printf("<p>%s</p>", $article->summary);
 echo "</li>";
 }
 ?>
