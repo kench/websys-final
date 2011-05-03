@@ -7,6 +7,7 @@ if ($_GET["url"] && $_SESSION["uid"])
 {
 	$u = User::find($_SESSION["uid"]);
 	$u->add_click($url);
+	header("Location: " . $_GET["url"]);
 }
 else if ($_SESSION["uid"])
 {
