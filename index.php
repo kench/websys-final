@@ -26,6 +26,8 @@ echo "</ul>";
 <title>MorningMail Recommendations</title>
 <link rel="stylesheet" href="static/application.css" type="text/css" />
 <script></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript"></script>
+<script src="application.js" type="text/javascript"></script>
 </head>
 <body>
 <div id="container">
@@ -57,10 +59,7 @@ printf("<p>%s</p>", $article_description);
 echo "</li>";
 }
 ?>
-		<li>
-			<a href="http://rpi.edu">Sample Article 1</a>
-			<p>Description of news item goes here and everything.</p>
-		</li>
+
 	</ul>
 </div>
 
