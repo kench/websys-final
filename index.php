@@ -51,7 +51,12 @@ echo "</ul>";
 <div id="content">
 	<ul>
 <?php
-foreach(Article::find_all() as $article)
+if($_SESSION['uid'])
+    $u = User::find($_SESSION['uid']);
+else
+    $u = User::find(session_id());
+
+foreach($u->recommendations() as $article)
 {
 echo "<li>";
 printf("<a href='%s'>%s</a>", $article->url, $article->headline);
@@ -65,7 +70,7 @@ echo "</li>";
 
 <footer>
 	<p>Developed as a final project for <a href="http://rpi.edu/~gillw3/websys/">Web Systems Development</a> Spring 2011.</p>
-	<p>&copy; Kenley Cheung, Matthew Perry, and Sean Lyons.</p>
+	<p>&copy; Kenley Cheung, Matt Perry, and Sean Lyons.</p>
 </footer>
 </div>
 </body>
