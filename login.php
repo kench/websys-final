@@ -1,33 +1,23 @@
 <?php
-$info = parse_ini_file( dirname(__FILE__) . '/config.ini', true );
-phpCAS::client(CAS_VERSION_2_0, $info['cas']['host'], $info['cas']['port'], $info['cas']['context']);
+include_once( "CAS.php" );
 
-require_once( "api.php" );
-include_once($phpcas_path.'/CAS.php');
+$info = parse_ini_file( 'config.ini', true );
+phpCAS::client(CAS_VERSION_2_0, $info['cas']['host'], (int)$info['cas']['port'], $info['cas']['context']);
 
-session_start();
-if($_GET["logout"])
+if( isset( $_GET["logout"] ) )
 {
 	// Logout
-	$_SESSION["uid"] = NULL;
-	phpCAS::logout();
+    $_SESSION = array();
+    session_destroy();
+    session_start();
+    phpCAS::logout();
 }
-else if ($_SESSION["uid"])
+else if( !isset( $_SESSION["cas"] ) || !$_SESSION["cas"] )
 {
-	// Already logged in.
-	$_SESSION["uid"] = phpCAS::getUser();
-	if (!($u = User::find($_SESSION["uid"])))
-	{
-		$u = new User($_SESSION["uid"]);
-	}
-}
-else
-{
+    phpCAS::setNoCasServerValidation();
 	phpCAS::forceAuthentication();
 	$_SESSION["uid"] = phpCAS::getUser();
-	if (!($u = User::find($_SESSION["uid"])))
-	{
-		$u = new User($_SESSION["uid"]);
-	}
+    $_SESSION["cas"] = true;
+	header( "Location: index.php" );
 }
 ?>

@@ -127,7 +127,7 @@ EOD;
         if( $num == 0 ) return array();
 
         // Append special chars to query string for variable
-        // length inputs
+        // length inputs=
         $var_list = ":0";
         for( $i = 1; $i < $this->size(); $i++ )
             $var_list .= ", :" . $i;
@@ -154,8 +154,7 @@ EOD;
             // If there are less than $num recommended urls, fill the
             // remainder of the request with the newest articles
             $num_normal = $num - count( $clicks );
-            array_push( $recommendations, Article::find_all( $num_normal ) );
-            return $recommendations;
+            return array_merge( $recommendations, Article::find_all( $num_normal ) );
         }
         catch( PDOException $e )
         {

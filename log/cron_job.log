@@ -5,3 +5,52 @@ Cluster runtime: 11 seconds
 Clusters made: 61
 Cluster write successful: true
 
+cron_job.php: 2011-05-05 21:22:17
+Articles removed: 0
+Articles added: 10
+Cluster runtime: 0 seconds
+Clusters made: 0
+Cluster write successful: true
+
+cron_job.php: 2011-05-05 21:22:47
+Articles removed: 0
+Articles added: 0
+Cluster runtime: 0 seconds
+Clusters made: 0
+Cluster write successful: true
+
+cron_job.php: 2011-05-05 21:29:54
+Articles removed: 0
+Articles added: 0
+Cluster runtime: 0 seconds
+Clusters made: 0
+Cluster write successful: true
+
+cron_job.php: 2011-05-05 21:31:26
+Articles removed: 0
+Articles added: 10
+Cluster runtime: 10 seconds
+Clusters made: 61
+Cluster write successful: true
+
+cron_job.php: 2011-05-05 21:52:12
+Articles removed: 0
+Articles added: 0
+Cluster runtime: 11 seconds
+Clusters made: 62
+Cluster write successful: true
+
+cron_job.php: 2011-05-05 22:16:13
+Articles removed: 0
+Articles added: 0
+Cluster runtime: 11 seconds
+Clusters made: 61
+Cluster write successful: true
+
+cron_job.php: 2011-05-05 22:24:44
+Articles removed: 0
+Articles added: 0
+Cluster runtime: 10 seconds
+Clusters made: 62
+Cluster write successful: true
+

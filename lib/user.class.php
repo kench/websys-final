@@ -159,7 +159,11 @@ class User
     // Return recommendations for this user
     public function recommendations( $num = 10 )
     {
-        return $this->get_cluster()->recommendations( $num );
+        if( $this->get_cluster() )
+            return $this->get_cluster()->recommendations( $num );
+        else
+            return Article::find_all( $num );
+
     }
 
     /******************************************************************
@@ -170,10 +174,14 @@ class User
     private function get_cluster()
     {
         // A little caching
-        if( isset( $m_cluster ) )
-            return $m_cluster;
-        else
-            return $m_cluster = Cluster::find_by_user( $this );
+        if( $this->data['pid'] )
+        {
+            if( isset( $m_cluster ) )
+                return $m_cluster;
+            else
+                return $m_cluster = Cluster::find_by_user( $this );
+        }
+        return false;
     }
 
     // This returns a user class which is the
