@@ -56,7 +56,7 @@ else
 foreach( $u->recommendations() as $article )
 {
     echo "<li>";
-    printf("<a href='%s'>%s</a>", $article->url, $article->headline);
+    printf('<a href="%1$s" name="%1$s">%2$s</a>', $article->url, $article->headline);
     printf("<p>%s</p>", $article->summary);
     echo "</li>";
     echo "<br /><hr /><br />";
