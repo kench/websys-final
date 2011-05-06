@@ -38,6 +38,17 @@ else
 ?>
                 </div>
             </header>
+<div id="recent">
+	<h1>Recently Clicked Links</h1>
+	<ul>
+		<li>
+			<a href="http://rpi.edu">Sample Article 1</a>
+		</li>
+		<li>
+			<a href="http://rpi.edu">Sample Article 2</a>
+		</li>
+	</ul>
+</div>
 
             <div id="content">
                 <ul>

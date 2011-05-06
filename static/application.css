@@ -100,3 +100,31 @@ footer * {
 	margin: 0;
 	line-height: 1.5em;
 }
+
+
+#recent {
+	clear: both;
+	float: right;
+	font-size: 10pt;
+	background-color: #a9a9a9;
+	padding: 5px;
+	width: 200px;
+}
+
+#recent h1 {
+	font-size: 1.25em;
+}
+
+#recent ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+#recent li a {
+	font-size: 1.5em;
+	text-decoration: none;
+}
+
+#recent li p {
+	margin: 5 0;
+}
