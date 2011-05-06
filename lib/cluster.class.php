@@ -146,15 +146,19 @@ EOD;
             // Find all the articles associated with the recommended
             // urls
             $clicks = $clicks->fetchAll( PDO::FETCH_ASSOC );
-            foreach( $clicks as $url => $count )
-                $recommendations[] = Article::find( $url );
+            foreach( $clicks as $info )
+                $recommendations[] = Article::find( $info["url"] );
             if( empty( $clicks ) )
                 $recommendations = array();
 
             // If there are less than $num recommended urls, fill the
             // remainder of the request with the newest articles
             $num_normal = $num - count( $clicks );
-            return array_merge( $recommendations, Article::find_all( $num_normal ) );
+            $articles = Article::find_all( $num );
+            for( $i = 0; $i < $num; $i++ )
+                if( !in_array( $articles[$i], $recommendations ) )
+                    $recommendations[] = $articles[$i];
+            return $recommendations;
         }
         catch( PDOException $e )
         {

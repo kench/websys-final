@@ -101,7 +101,8 @@ class Article
             // Fetch according to the symantics of the database
             // and return a new article with this information
             if( $article->rowCount() == 0 ) return false;
-            return new Article( $article->fetchAll( PDO::FETCH_ASSOC ) );
+            $article = $article->fetchAll( PDO::FETCH_ASSOC );
+            return new Article( $article[0] );
         }
         catch( PDOException $e )
         {

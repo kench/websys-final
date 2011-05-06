@@ -22,6 +22,7 @@ class User
     private static $SQL_PARENT = "SELECT parent FROM centers WHERE uid = ?;";
     private static $SQL_UIDS = "SELECT DISTINCT uid FROM clicks WHERE clicked_at > ?;";
     private static $SQL_UIDS_CLICKS = "SELECT * FROM clicks WHERE clicked_at > ?;";
+    private static $SQL_RECENT_CLICKS = "SELECT url FROM clicks WHERE uid = ? ORDER BY clicked_at DESC LIMIT 5;";
 
     private static $SQL_ADD_CLICK = "INSERT INTO clicks VALUES( ?, ?, ? );";
     private static $SQL_ADD_PARENT = "INSERT INTO centers VALUES( ?, ? );";
@@ -141,6 +142,24 @@ class User
             // Add a click to this user object if the query executed
             $this->data['clicks'][] = $url;
             return true;
+        }
+        catch( PDOException $e )
+        {
+            echo "Error: " . $e;
+            return false;
+        }
+    }
+
+    // Recently clicked articles
+    public function recent()
+    {
+        try 
+        {
+            $query = Database::prepare( self::$SQL_RECENT_CLICKS );
+
+            $query->execute( array( $this->data['uid'] ) );
+
+            return $query->fetchAll( PDO::FETCH_ASSOC  );
         }
         catch( PDOException $e )
         {

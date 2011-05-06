@@ -61,3 +61,24 @@ Cluster runtime: 11 seconds
 Clusters made: 62
 Cluster write successful: true
 
+cron_job.php: 2011-05-06 12:40:18
+Articles removed: 0
+Articles added: 10
+Cluster runtime: 42 seconds
+Clusters made: 61
+Cluster write successful: true
+
+cron_job.php: 2011-05-06 12:47:17
+Articles removed: 0
+Articles added: 0
+Cluster runtime: 42 seconds
+Clusters made: 62
+Cluster write successful: true
+
+cron_job.php: 2011-05-06 13:06:46
+Articles removed: 0
+Articles added: 10
+Cluster runtime: 44 seconds
+Clusters made: 62
+Cluster write successful: true
+
