@@ -61,6 +61,18 @@ foreach( $u->recommendations() as $article )
     echo "</li>";
     echo "<br /><hr /><br />";
 }
+echo "</ul>";
+echo "</div>";
+echo "<div id='recent' >";
+echo "<ul>";
+foreach( $u->recent() as $info )
+{
+    $article = Article::find( $info["url"] );
+    echo "<li>";
+    printf('<a href="%1$s" name="%1$s">%2$s</a>', $article->url, $article->headline);
+    echo "</li>";
+    echo "<br />";
+}
 ?>
                 </ul>
             </div>
