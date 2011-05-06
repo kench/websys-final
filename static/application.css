@@ -29,7 +29,7 @@ header #info_box {
 	width: 250px;
 	position: absolute;
 	top: 0;
-	right: 20px;
+	right: 40px;
 	padding: 10px;
 	color: white;
 	background-color: rgba(0,0,0,1);
@@ -55,9 +55,10 @@ header #info_box a {
 
 #content {
 	background-color: #d9d9d9;
-	margin: 40px 40px 20px;
+	margin: 40px 220px 20px 40px;
 	padding: 5px 10px;
 	border-radius: 10px;
+	border: 1px solid #a9a9a9;
 }
 
 #content ul {
@@ -100,7 +101,6 @@ footer * {
 	margin: 0;
 	line-height: 1.5em;
 }
-
 
 #recent {
 	clear: both;
