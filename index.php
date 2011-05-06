@@ -50,6 +50,21 @@ else
 	</ul>
 </div>
 
+echo "<div id='recent' >";
+echo "<ul>";
+foreach( $u->recent() as $info )
+{
+    $article = Article::find( $info["url"] );
+    echo "<li>";
+    printf('<a href="%1$s" name="%1$s">%2$s</a>', $article->url, $article->headline);
+    echo "</li>";
+    echo "<br />";
+}
+?>
+                </ul>
+            </div>
+
+
             <div id="content">
                 <ul>
 <?php
@@ -74,19 +89,7 @@ foreach( $u->recommendations() as $article )
 }
 echo "</ul>";
 echo "</div>";
-echo "<div id='recent' >";
-echo "<ul>";
-foreach( $u->recent() as $info )
-{
-    $article = Article::find( $info["url"] );
-    echo "<li>";
-    printf('<a href="%1$s" name="%1$s">%2$s</a>', $article->url, $article->headline);
-    echo "</li>";
-    echo "<br />";
-}
-?>
-                </ul>
-            </div>
+
 
             <footer>
                 <p>Developed as a final project for <a href="http://rpi.edu/~gillw3/websys/">Web Systems Development</a> Spring 2011.</p>
