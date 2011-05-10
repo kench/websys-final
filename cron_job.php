@@ -11,7 +11,7 @@
  */
 require_once( "lib/api.php" );
 
-$qt_days = 100;
+$qt_days = 30;
 $qt_threshold = 0.5;
 
 $cleanup_count = Article::cleanup();
